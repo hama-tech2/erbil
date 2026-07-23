@@ -99,6 +99,7 @@ a { color: inherit; text-decoration: none; }
 .nav__inner {
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
   max-width: 86rem; margin-inline: auto;
+  flex-direction: row-reverse;    /* nav links on the RIGHT, logo on the left */
 }
 .nav.is-solid {
   background: var(--sand);
