@@ -1,6 +1,7 @@
 /* ============================================================
-   هەولێر · Erbil Citadel — scrollytelling behaviour
-   GSAP + ScrollTrigger. Scroll-scrubbed hero video.
+   هەولێر · Erbil Citadel — museum-grade scrollytelling
+   GSAP + ScrollTrigger. Scroll-scrubbed hero video, pinned
+   history strip, custom cursor, reveals, parallax.
    Respects prefers-reduced-motion; degrades without GSAP.
    ============================================================ */
 
@@ -18,32 +19,55 @@
   function init() {
     var y = document.getElementById("year");
     if (y) y.textContent = new Date().getFullYear();
+    startClock();
 
     var hasGSAP = window.gsap && window.ScrollTrigger;
     if (hasGSAP) gsap.registerPlugin(ScrollTrigger);
 
     setupNav();
+    if (!isTouch) setupCursor();          // cursor works with or without GSAP
 
     if (reduceMotion || !hasGSAP) { staticFallback(); return; }
 
-    if (!isTouch) setupCursor();
     splitHeadings();
     setupHero();
     setupReveals();
     setupParallax();
     setupClipReveals();
+    setupTell();
+    setupStrip();
     if (!isTouch) setupMagnetic();
     introSequence();
+
+    // Recalculate once fonts/images settle.
+    window.addEventListener("load", function () { ScrollTrigger.refresh(); });
   }
 
   /* ----------------------------------------------------------
-     NAV
+     Live Erbil clock (Asia/Baghdad, UTC+3)
+     ---------------------------------------------------------- */
+  function startClock() {
+    var el = document.getElementById("clock");
+    if (!el) return;
+    function tick() {
+      try {
+        el.textContent = new Intl.DateTimeFormat("en-GB", {
+          hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Baghdad"
+        }).format(new Date());
+      } catch (e) {
+        var d = new Date(Date.now() + (3 * 60 + new Date().getTimezoneOffset()) * 60000);
+        el.textContent = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+      }
+    }
+    tick(); setInterval(tick, 20000);
+  }
+
+  /* ----------------------------------------------------------
+     NAV — solid bar on scroll + active-link diamond
      ---------------------------------------------------------- */
   function setupNav() {
     var nav = document.getElementById("nav");
-    var onScroll = function () {
-      nav.classList.toggle("is-solid", window.scrollY > window.innerHeight * 0.6);
-    };
+    var onScroll = function () { nav.classList.toggle("is-solid", window.scrollY > window.innerHeight * 0.6); };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
 
@@ -61,33 +85,69 @@
   }
 
   /* ----------------------------------------------------------
-     HERO — pinned, scroll-scrubbed Earth-zoom video
+     Custom gold cursor — rAF lerp; grows over links, arrow over media
+     ---------------------------------------------------------- */
+  function setupCursor() {
+    var cursor = document.getElementById("cursor");
+    if (!cursor) return;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var cx = vw / 2, cy = vh / 2, tx = cx, ty = cy, seen = false;
 
-     The scroll is split into two phases across the pin:
-       0 .. VIDEO_END : the video scrubs through its FULL length
-                        (space -> citadel), and the three lines
-                        leave one by one (right, left, right).
-       VIDEO_END .. 1 : the video holds on its LAST frame while the
-                        three lines return and the CTA appears — this
-                        is the extra "hold" after the video finishes.
+    window.addEventListener("mousemove", function (e) { tx = e.clientX; ty = e.clientY; seen = true; }, { passive: true });
+    window.addEventListener("mouseout", function (e) { if (!e.relatedTarget) cursor.style.opacity = "0"; });
+    window.addEventListener("mouseover", function () { cursor.style.opacity = "1"; });
+
+    (function loop() {
+      cx += (tx - cx) * 0.2; cy += (ty - cy) * 0.2;
+      cursor.style.transform = "translate3d(" + cx + "px," + cy + "px,0) translate(-50%,-50%)";
+      requestAnimationFrame(loop);
+    })();
+
+    var grow = document.querySelectorAll("a, button, .btn, .link-arrow, .nav__link");
+    grow.forEach(function (el) {
+      el.addEventListener("mouseenter", function () { cursor.classList.add("is-grow"); });
+      el.addEventListener("mouseleave", function () { cursor.classList.remove("is-grow"); });
+    });
+    document.querySelectorAll(".media").forEach(function (el) {
+      el.addEventListener("mouseenter", function () { cursor.classList.add("is-media"); });
+      el.addEventListener("mouseleave", function () { cursor.classList.remove("is-media"); });
+    });
+  }
+
+  /* ----------------------------------------------------------
+     HERO — pinned, scroll-scrubbed video
+
+     Pin the whole section (pinSpacing keeps the sections below from
+     rendering until the scrub is complete). The clip plays across the
+     first part of the scroll; then ~100vh of extra pinned scroll holds
+     the final frame while the three lines return, crisp and staying on.
      ---------------------------------------------------------- */
   function setupHero() {
     var hero = document.getElementById("hero");
-    var pin = hero.querySelector(".hero__pin");
     var video = hero.querySelector(".hero__video");
     var l1 = hero.querySelector(".hero__line--1");
     var l2 = hero.querySelector(".hero__line--2");
     var l3 = hero.querySelector(".hero__line--3");
     var cta = hero.querySelector(".hero__cta");
     var hint = hero.querySelector(".hero__scroll");
+    var annot = hero.querySelector(".hero__annot");
+    var annotLine = hero.querySelector(".annot__line");
 
-    // The whole clip plays across the FIRST portion of the scroll, then the
-    // last frame is held while the lines return. A shorter pin keeps the video
-    // moving briskly so the citadel arrival is actually reached, not crawled to.
-    var VIDEO_END = 0.82;                 // video reaches its last frame at 82% of the scroll
-    var pinLength = isMobile ? "+=200%" : "+=360%";
+    // Extra hold ≈ 100vh on top of the video-scrub distance.
+    var videoScroll = isMobile ? 180 : 320;   // vh spent scrubbing the clip
+    var holdScroll = isMobile ? 80 : 100;      // vh holding the final frame
+    var totalScroll = videoScroll + holdScroll;
+    var VIDEO_END = videoScroll / totalScroll; // progress at which the clip finishes
+    var pinLength = "+=" + totalScroll + "%";
 
-    // iOS/Safari unlock so the video becomes seekable, and force buffering.
+    // Prepare the annotation leader-line for a stroke-dashoffset draw.
+    if (annotLine) {
+      var len = annotLine.getTotalLength();
+      annotLine.style.strokeDasharray = len;
+      annotLine.style.strokeDashoffset = len;
+    }
+
+    // iOS/Safari unlock + force buffering.
     var unlocked = false;
     function unlock() {
       if (unlocked) return; unlocked = true;
@@ -100,17 +160,13 @@
     });
     try { video.load(); } catch (e) {}
 
-    // --- Robust video scrub -----------------------------------------
-    // Smoothed target + throttled seeking: only issue a new seek once the
-    // previous one has finished, so seeks never queue up and stutter. That
-    // queue-backup is what made the clip look like it was skipping/cutting.
+    // Robust scrub: smoothed target + throttled seeking (one seek at a time).
     var duration = 0, target = 0, current = 0, canScrub = true, seeking = false;
     function onMeta() { duration = video.duration || 0; try { video.currentTime = 0; } catch (e) {} }
     if (video.readyState >= 1) onMeta();
     video.addEventListener("loadedmetadata", onMeta);
     video.addEventListener("seeked", function () { seeking = false; });
-
-    function rafLoop() {
+    (function raf() {
       if (duration) {
         current += (target - current) * 0.2;
         if (Math.abs(target - current) < 0.008) current = target;
@@ -119,47 +175,42 @@
           try { video.currentTime = current; } catch (e) { canScrub = false; seeking = false; }
         }
       }
-      requestAnimationFrame(rafLoop);
-    }
-    requestAnimationFrame(rafLoop);
+      requestAnimationFrame(raf);
+    })();
 
-    // --- Choreography timeline (scrubbed, pins the hero) ------------
     var tl = gsap.timeline({
-      defaults: { ease: "power1.inOut" },
+      defaults: { ease: "power2.inOut" },
       scrollTrigger: {
         trigger: hero, start: "top top", end: pinLength,
-        pin: pin, scrub: isMobile ? 0.6 : 1, anticipatePin: 1,
+        pin: true, pinSpacing: true, scrub: isMobile ? 0.6 : 1, anticipatePin: 1,
         onUpdate: function (self) {
           if (!duration) return;
           var v = self.progress / VIDEO_END;
-          if (v >= 1) { target = duration - 0.04; return; }   // guarantee the final frame
-          target = v * (duration - 0.04);
+          target = (v >= 1 ? duration - 0.04 : v * (duration - 0.04));
         }
       }
     });
 
-    // Timeline length = 1; positions are absolute fractions of the pin.
-    // The lines stay fully readable for the first stretch, THEN leave one by
-    // one — right, left, right — each with a small fade.
-    tl.to(l1, { xPercent: 118, scale: 0.94, autoAlpha: 0, duration: 0.12 }, 0.10)
-      .to(l2, { xPercent: -128, scale: 0.94, autoAlpha: 0, duration: 0.12 }, 0.22)
-      .to(l3, { xPercent: 118, scale: 0.94, autoAlpha: 0, duration: 0.12 }, 0.34);
+    // Annotation: draw the leader line as the scrub starts, then fade it
+    // out as the camera descends toward the citadel.
+    if (annotLine) tl.to(annotLine, { strokeDashoffset: 0, duration: 0.08, ease: "power2.out" }, 0.01);
+    tl.to(annot, { autoAlpha: 0, duration: 0.10 }, 0.16);
 
-    // Middle: ~0.46 .. 0.82 the video keeps zooming to the citadel, no text.
+    // Lines stay readable at the very start, then LEAVE one by one —
+    // right, left, right — sliding fully off-screen (no blur).
+    tl.to(l1, { xPercent: 150, duration: 0.12 }, 0.10)
+      .to(l2, { xPercent: -160, duration: 0.12 }, 0.22)
+      .to(l3, { xPercent: 150, duration: 0.12 }, 0.34);
 
-    // --- Lines RETURN over the final frame: enter from the right,
-    //     settle moving left, soft small fade-in + slight scale-up ---
-    tl.fromTo(l1, { xPercent: 80, scale: 0.96, autoAlpha: 0 },
-                  { xPercent: 0, scale: 1, autoAlpha: 1, duration: 0.09 }, 0.84)
-      .fromTo(l2, { xPercent: 80, scale: 0.96, autoAlpha: 0 },
-                  { xPercent: 0, scale: 1, autoAlpha: 0.9, duration: 0.09 }, 0.89)
-      .fromTo(l3, { xPercent: 80, scale: 0.96, autoAlpha: 0 },
-                  { xPercent: 0, scale: 1, autoAlpha: 1, duration: 0.09 }, 0.94)
-      .to(hint, { autoAlpha: 0, duration: 0.05 }, 0.84)
-      .fromTo(cta, { autoAlpha: 0, y: 20, visibility: "visible" },
-                   { autoAlpha: 1, y: 0, duration: 0.08 }, 0.95);
+    // Lines RETURN over the final frame — CRISP: enter from the right,
+    // settle, small scale-up. No fade, no blur. They stay on screen.
+    tl.set([l1, l2, l3], { autoAlpha: 1 }, VIDEO_END - 0.001)
+      .fromTo(l1, { xPercent: 70, scale: 0.94 }, { xPercent: 0, scale: 1, duration: 0.08, ease: "power3.out" }, VIDEO_END + 0.02)
+      .fromTo(l2, { xPercent: 70, scale: 0.94 }, { xPercent: 0, scale: 1, duration: 0.08, ease: "power3.out" }, VIDEO_END + 0.07)
+      .fromTo(l3, { xPercent: 70, scale: 0.94 }, { xPercent: 0, scale: 1, duration: 0.08, ease: "power3.out" }, VIDEO_END + 0.12)
+      .to(hint, { autoAlpha: 0, duration: 0.05 }, VIDEO_END)
+      .fromTo(cta, { autoAlpha: 0, y: 18, visibility: "visible" }, { autoAlpha: 1, y: 0, duration: 0.07 }, VIDEO_END + 0.16);
 
-    // --- Fallback: play once through if seeking is unsupported ------
     ScrollTrigger.create({
       trigger: hero, start: "top top", end: pinLength,
       onEnter: function () { if (!canScrub) video.play().catch(function () {}); }
@@ -187,38 +238,78 @@
      ---------------------------------------------------------- */
   function setupReveals() {
     gsap.utils.toArray(".reveal").forEach(function (el) {
-      ScrollTrigger.create({ trigger: el, start: "top 86%", once: true,
+      ScrollTrigger.create({ trigger: el, start: "top 88%", once: true,
         onEnter: function () { el.classList.add("is-in"); } });
     });
     gsap.utils.toArray(".split").forEach(function (h) {
       gsap.to(h.querySelectorAll(".word > span"), {
         yPercent: 0, duration: 0.9, ease: "power3.out", stagger: 0.08,
-        scrollTrigger: { trigger: h, start: "top 86%" }
+        scrollTrigger: { trigger: h, start: "top 88%" }
       });
     });
   }
 
   /* ----------------------------------------------------------
-     Parallax on full-width images
+     Parallax on full-width / grid images
      ---------------------------------------------------------- */
   function setupParallax() {
     gsap.utils.toArray("[data-parallax] img").forEach(function (img) {
-      gsap.fromTo(img, { yPercent: -8 }, { yPercent: 8, ease: "none",
+      gsap.fromTo(img, { yPercent: -6 }, { yPercent: 6, ease: "none",
         scrollTrigger: { trigger: img.closest("[data-parallax]"), start: "top bottom", end: "bottom top", scrub: true } });
+    });
+    // Inner parallax for the tall photo cards
+    gsap.utils.toArray("[data-parallax-card] img").forEach(function (img) {
+      gsap.fromTo(img, { yPercent: -8 }, { yPercent: 8, ease: "none",
+        scrollTrigger: { trigger: img.closest("[data-parallax-card]"), start: "top bottom", end: "bottom top", scrub: true } });
     });
   }
 
   /* ----------------------------------------------------------
-     Clip-path wipe reveal for the intro image
+     Clip-path wipe reveals for section images
      ---------------------------------------------------------- */
   function setupClipReveals() {
     gsap.utils.toArray(".reveal-clip").forEach(function (fig) {
       var img = fig.querySelector("img");
       gsap.set(fig, { clipPath: "inset(0 0 100% 0)" });
       gsap.to(fig, { clipPath: "inset(0 0 0% 0)", duration: 1.2, ease: "power3.inOut",
-        scrollTrigger: { trigger: fig, start: "top 82%" } });
+        scrollTrigger: { trigger: fig, start: "top 84%" } });
       if (img) gsap.to(img, { scale: 1, duration: 1.4, ease: "power3.out",
-        scrollTrigger: { trigger: fig, start: "top 82%" } });
+        scrollTrigger: { trigger: fig, start: "top 84%" } });
+    });
+  }
+
+  /* ----------------------------------------------------------
+     Tell cross-section: layers grow in bottom-to-top
+     ---------------------------------------------------------- */
+  function setupTell() {
+    var layers = gsap.utils.toArray(".tell__layer");
+    if (!layers.length) return;
+    gsap.set(layers, { scaleY: 0, transformOrigin: "bottom" });
+    gsap.to(layers, {
+      scaleY: 1, duration: 0.7, ease: "power2.out", stagger: 0.12,
+      scrollTrigger: { trigger: ".tell", start: "top 82%" }
+    });
+  }
+
+  /* ----------------------------------------------------------
+     History — horizontal pinned scroll strip (RTL pan)
+     ---------------------------------------------------------- */
+  function setupStrip() {
+    var track = document.getElementById("strip-track");
+    var section = document.querySelector(".s03");
+    if (!track || !section) return;
+
+    // On small screens, let the strip scroll natively instead of pinning.
+    if (isMobile) { document.getElementById("strip").style.overflowX = "auto"; return; }
+
+    function amount() { return Math.max(0, track.scrollWidth - window.innerWidth); }
+    gsap.to(track, {
+      x: function () { return amount(); },     // RTL: pan content to reveal later eras
+      ease: "none",
+      scrollTrigger: {
+        trigger: section, start: "top top", end: function () { return "+=" + amount(); },
+        pin: true, scrub: 1, anticipatePin: 1, invalidateOnRefresh: true
+      }
     });
   }
 
@@ -239,34 +330,13 @@
   }
 
   /* ----------------------------------------------------------
-     Custom cursor
-     ---------------------------------------------------------- */
-  function setupCursor() {
-    var cursor = document.querySelector(".cursor");
-    if (!cursor) return;
-    var xTo = gsap.quickTo(cursor, "x", { duration: 0.18, ease: "power3" });
-    var yTo = gsap.quickTo(cursor, "y", { duration: 0.18, ease: "power3" });
-    window.addEventListener("mousemove", function (e) { xTo(e.clientX); yTo(e.clientY); });
-    document.addEventListener("mouseleave", function () { gsap.to(cursor, { autoAlpha: 0, duration: 0.2 }); });
-    document.addEventListener("mouseenter", function () { gsap.to(cursor, { autoAlpha: 1, duration: 0.2 }); });
-
-    document.querySelectorAll("a, button, .btn, .link-arrow, .nav__link").forEach(function (el) {
-      el.addEventListener("mouseenter", function () { cursor.classList.add("is-grow"); });
-      el.addEventListener("mouseleave", function () { cursor.classList.remove("is-grow"); });
-    });
-    document.querySelectorAll(".media").forEach(function (el) {
-      el.addEventListener("mouseenter", function () { cursor.classList.add("is-media"); });
-      el.addEventListener("mouseleave", function () { cursor.classList.remove("is-media"); });
-    });
-  }
-
-  /* ----------------------------------------------------------
-     Orchestrated page-load: nav, then hero text, one after another
+     Orchestrated page-load sequence
      ---------------------------------------------------------- */
   function introSequence() {
     gsap.timeline({ defaults: { ease: "power3.out" } })
       .from(".nav__logo", { y: -20, autoAlpha: 0, duration: 0.7 })
       .from(".nav__links", { y: -20, autoAlpha: 0, duration: 0.7 }, "-=0.5")
+      .from(".hero__eyebrow", { autoAlpha: 0, y: 16, duration: 0.7 }, "-=0.3")
       .from(".hero__line--1", { autoAlpha: 0, y: 30, duration: 0.9 }, "-=0.2")
       .from(".hero__line--2", { autoAlpha: 0, y: 20, duration: 0.8 }, "-=0.55")
       .from(".hero__line--3", { autoAlpha: 0, y: 30, duration: 0.9 }, "-=0.55")

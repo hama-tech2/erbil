@@ -3,27 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#E8D5A8" />
+  <meta name="theme-color" content="#3B2E22" />
   <title>هەولێر — لە دڵی مێژوودا · Erbil Citadel</title>
-  <meta name="description" content="هەولێر (Erbil) و قەڵاکەی — یەکێک لە کۆنترین شارە بەردەوام نیشتەجێبووەکانی جیهان. گێڕانەوەیەکی سینەمایی." />
+  <meta name="description" content="قەڵای هەولێر — شوێنێکی کەلەپووری جیهانی یونیسکۆ، یەکێک لە کۆنترین شوێنە شارییە بەردەوام نیشتەجێبووەکانی جیهان." />
 
   <!-- Fonts: Amiri (serif headings) + Noto Sans Arabic (body) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
+  <!-- Preload the hero video -->
+  <link rel="preload" as="video" href="hero-background.mp4" type="video/mp4" />
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- Custom cursor (hidden on touch devices) -->
-  <div class="cursor" aria-hidden="true"><span class="cursor__arrow">←</span></div>
+  <!-- Custom gold cursor (hidden on touch devices) -->
+  <div class="cursor" id="cursor" aria-hidden="true"><span class="cursor__arrow">←</span></div>
 
   <!-- ============================================================
        NAV — ornamental gold frame, RTL, citadel icons at both ends
        ============================================================ -->
   <header class="nav" id="nav">
     <div class="nav__inner">
+      <nav class="nav__links" aria-label="ناڤیگەیشنی سەرەکی">
+        <svg class="nav__end icon-citadel" viewBox="0 0 48 32" aria-hidden="true"><use href="#citadel-icon"></use></svg>
+        <a href="#s01" class="nav__link">دەربارە</a>
+        <span class="nav__dot" aria-hidden="true"></span>
+        <a href="#s03" class="nav__link">مێژوو</a>
+        <span class="nav__dot" aria-hidden="true"></span>
+        <a href="#s05" class="nav__link">شوێنەکان</a>
+        <span class="nav__dot" aria-hidden="true"></span>
+        <a href="#s06" class="nav__link">پەیوەندی</a>
+        <svg class="nav__end icon-citadel" viewBox="0 0 48 32" aria-hidden="true"><use href="#citadel-icon"></use></svg>
+      </nav>
+
       <a class="nav__logo" href="#top" aria-label="هەولێر — Erbil Citadel">
         <svg class="icon-citadel" viewBox="0 0 48 32" aria-hidden="true"><use href="#citadel-icon"></use></svg>
         <span class="nav__logo-text">
@@ -31,18 +46,6 @@
           <span class="nav__logo-en">Erbil Citadel</span>
         </span>
       </a>
-
-      <nav class="nav__links" aria-label="ناڤیگەیشنی سەرەکی">
-        <svg class="nav__end icon-citadel" viewBox="0 0 48 32" aria-hidden="true"><use href="#citadel-icon"></use></svg>
-        <a href="#about" class="nav__link">دەربارە</a>
-        <span class="nav__dot" aria-hidden="true"></span>
-        <a href="#history" class="nav__link">مێژوو</a>
-        <span class="nav__dot" aria-hidden="true"></span>
-        <a href="#places" class="nav__link">شوێنەکان</a>
-        <span class="nav__dot" aria-hidden="true"></span>
-        <a href="#contact" class="nav__link">پەیوەندی</a>
-        <svg class="nav__end icon-citadel" viewBox="0 0 48 32" aria-hidden="true"><use href="#citadel-icon"></use></svg>
-      </nav>
     </div>
   </header>
 
@@ -52,46 +55,49 @@
        HERO — pinned, scroll-scrubbed Earth-zoom video (signature)
        ============================================================ -->
   <section class="hero" id="hero" aria-label="هەولێر لە دڵی مێژوودا">
-    <div class="hero__pin">
-      <!-- Scrubbed video: NOT autoplay, muted, no controls -->
+    <div class="hero__stage">
       <video class="hero__video" muted playsinline preload="auto" tabindex="-1">
         <source src="hero-background.mp4" type="video/mp4" />
         <source src="https://github.com/hama-tech2/erbil/raw/refs/heads/main/hero-background-video2.mp4" type="video/mp4" />
       </video>
-
-      <!-- Soft dark vignette (the only gradient in the design) -->
       <div class="hero__vignette" aria-hidden="true"></div>
+
+      <!-- Animated map annotation over the earth frame -->
+      <svg class="hero__annot" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <circle class="annot__ring" cx="500" cy="360" r="26" />
+        <circle class="annot__dot" cx="500" cy="360" r="3" />
+        <path class="annot__line" d="M500 360 L690 150 L840 150" />
+        <text class="annot__label" x="700" y="132">ERBIL</text>
+        <text class="annot__coord" x="700" y="168">36.1911° N / 44.0092° E</text>
+      </svg>
 
       <!-- Three stacked RTL lines -->
       <div class="hero__content">
+        <p class="hero__eyebrow"><span class="hero__eb-rule"></span>کەلەپووری جیهانی یونیسکۆ<span class="hero__eb-rule"></span></p>
         <h1 class="hero__stack">
           <span class="hero__line hero__line--1">هەولێر</span>
-          <span class="hero__line hero__line--2">
-            <span class="hero__rule" aria-hidden="true"></span>
-            لە دڵی
-            <span class="hero__rule" aria-hidden="true"></span>
-          </span>
+          <span class="hero__line hero__line--2"><span class="hero__rule" aria-hidden="true"></span>لە دڵی<span class="hero__rule" aria-hidden="true"></span></span>
           <span class="hero__line hero__line--3">مێژوودا</span>
         </h1>
-
-        <!-- End-of-hero CTA, revealed over the final citadel frame -->
         <div class="hero__cta">
-          <p class="hero__tag">یەکێک لە کۆنترین شارە زیندووەکانی جیهان</p>
-          <a href="#about" class="btn btn--ghost magnetic">
-            <span>زیاتر بزانە</span>
-            <span class="btn__arrow" aria-hidden="true">←</span>
-          </a>
+          <p class="hero__tag">یەکێک لە کۆنترین شوێنە شارییە بەردەوام نیشتەجێبووەکانی جیهان</p>
+          <a href="#s01" class="btn btn--solid magnetic"><span>زیارت بکە</span><span class="btn__arrow" aria-hidden="true">←</span></a>
         </div>
       </div>
 
       <!-- Corner details -->
-      <div class="hero__corner hero__corner--coords">36.1911° N / 44.0092° E</div>
-      <div class="hero__corner hero__corner--year">2026</div>
+      <div class="hero__corner hero__corner--coords" aria-hidden="true">
+        <svg viewBox="0 0 24 24" class="hero__corner-ic"><use href="#compass-icon"></use></svg>
+        <span>36.1911° N<br>44.0092° E</span>
+      </div>
+      <div class="hero__corner hero__corner--clock" aria-hidden="true">
+        <svg viewBox="0 0 24 24" class="hero__corner-ic"><use href="#clock-icon"></use></svg>
+        <span><span id="clock">—</span><br>HEWLÊR</span>
+      </div>
 
-      <!-- Animated scroll indicator -->
       <div class="hero__scroll" aria-hidden="true">
         <span class="hero__mouse"><span class="hero__wheel"></span></span>
-        <span class="hero__scroll-txt">بۆ خوارەوە بڕۆ</span>
+        <span class="hero__scroll-txt">SCROLL</span>
       </div>
     </div>
   </section>
@@ -99,153 +105,322 @@
   <main>
 
     <!-- ==========================================================
-         01 — INTRO. Asymmetric split, RTL. Clip-path image wipe.
+         01 — ORIENTATION (dark). SVG line-art map of Erbil.
          ========================================================== -->
-    <section class="intro" id="about" aria-labelledby="intro-title">
+    <section class="section section--dark s01" id="s01" aria-labelledby="s01-title">
       <span class="marker" aria-hidden="true">٠١</span>
-      <div class="intro__grid wrap">
-        <div class="intro__text">
-          <p class="eyebrow reveal">دەربارەی هەولێر</p>
-          <h2 class="section-title split" id="intro-title">شارێک لە دڵی مێژوو</h2>
+      <div class="wrap s01__grid">
+        <div class="s01__text">
+          <p class="eyebrow reveal">سەرنجدان</p>
+          <h2 class="section-title split" id="s01-title">شارێک بە شێوەی بازنە</h2>
           <p class="lead reveal">
-            هەولێر، پایتەختی هەرێمی کوردستان، یەکێکە لە کۆنترین شارە بەردەوام
-            نیشتەجێبووەکانی جیهان — شوێنێک کە بۆ زیاتر لە شەش هەزار ساڵ چرای
-            ژیانی تێدا نەکوژاوەتەوە.
+            هەولێر لە ناوەندی دەشتێکدا دانراوە و قەڵاکەی وەک ناوکێک لە ناوەڕاستیدا
+            دەبینرێت. کۆڵانەکانی شاری کۆن وەک تیشکی خۆر لە دەوری قەڵاکەوە بڵاو دەبنەوە.
           </p>
           <p class="body reveal">
-            لە ناوەڕاستی شاردا، لەسەر تەپۆڵکەیەکی بەرزی دەستکرد، قەڵای هەولێر
-            وەک تاجێک دانیشتووە و سەیری کۆڵان و بازاڕەکانی خوارەوە دەکات.
+            ئەم شێوە بازنەییە کە لە ئاسمانەوە دیارە، بەشێکی زۆری بۆ سەردەمی دواتری
+            عوسمانی دەگەڕێتەوە — نەخشەیەکی زیندووی مێژوو.
           </p>
-          <a href="#history" class="link-arrow reveal">
-            <span>مێژووەکەی بخوێنەوە</span><span class="link-arrow__i" aria-hidden="true">←</span>
-          </a>
+          <a href="#s02" class="link-arrow reveal"><span>بەردەوام بە</span><span class="link-arrow__i" aria-hidden="true">←</span></a>
         </div>
 
-        <figure class="intro__media media reveal-clip" data-parallax>
-          <img src="https://images.unsplash.com/photo-1591825729269-caeb344f6df2?auto=format&fit=crop&w=1400&q=80"
-               alt="قەڵای هەولێر لەسەر تەپۆڵکەکە" loading="lazy"
-               onerror="this.closest('.media').classList.add('media--fallback')" />
-          <figcaption class="media__cap">قەڵای هەولێر</figcaption>
+        <!-- Concentric line-art map that draws in on scroll -->
+        <figure class="s01__map" aria-label="نەخشەی خەتی شاری کۆنی هەولێر">
+          <svg viewBox="0 0 400 400" class="citymap">
+            <g class="citymap__rings" fill="none" stroke="var(--gold)" stroke-width="1">
+              <circle cx="200" cy="200" r="60" />
+              <circle cx="200" cy="200" r="100" />
+              <circle cx="200" cy="200" r="140" />
+              <circle cx="200" cy="200" r="180" />
+            </g>
+            <g class="citymap__spokes" stroke="var(--gold)" stroke-width=".6" opacity=".55">
+              <line x1="200" y1="200" x2="200" y2="20"/><line x1="200" y1="200" x2="327" y2="73"/>
+              <line x1="200" y1="200" x2="380" y2="200"/><line x1="200" y1="200" x2="327" y2="327"/>
+              <line x1="200" y1="200" x2="200" y2="380"/><line x1="200" y1="200" x2="73" y2="327"/>
+              <line x1="200" y1="200" x2="20" y2="200"/><line x1="200" y1="200" x2="73" y2="73"/>
+            </g>
+            <g class="citymap__center">
+              <circle cx="200" cy="200" r="34" fill="none" stroke="var(--gold)" stroke-width="1.4"/>
+              <use href="#citadel-mark" x="168" y="184" width="64" height="34" />
+            </g>
+            <g class="citymap__labels" fill="var(--sand)" font-size="9" letter-spacing="1.5">
+              <circle cx="200" cy="200" r="2.5" fill="var(--gold)"/>
+              <text x="212" y="196">قەڵا</text>
+              <text x="286" y="150" fill="var(--gold)">بازاڕی قەیسەری</text>
+              <circle cx="278" cy="146" r="2" fill="var(--gold)"/>
+              <text x="96" y="262" fill="var(--gold)">منارەی موزەفەری</text>
+              <circle cx="150" cy="258" r="2" fill="var(--gold)"/>
+            </g>
+          </svg>
         </figure>
       </div>
     </section>
 
     <!-- ==========================================================
-         02 — HISTORY. Readable, right-aligned narrative text.
+         02 — WHAT YOU'RE LOOKING AT (cream). Aerial + tell section.
          ========================================================== -->
-    <section class="history" id="history" aria-labelledby="history-title">
-      <div class="wrap history__wrap">
-        <p class="eyebrow reveal">مێژوو و شارستانیەت</p>
-        <h2 class="section-title split" id="history-title">چیرۆکی هەزاران ساڵ</h2>
+    <section class="section section--cream s02" id="s02" aria-labelledby="s02-title">
+      <span class="marker" aria-hidden="true">٠٢</span>
+      <div class="wrap s02__grid">
+        <figure class="s02__photo media reveal-clip" data-parallax>
+          <img alt="دیمەنێکی لاری قەڵای هەولێر" loading="lazy"
+               referrerpolicy="no-referrer"
+               src="https://commons.wikimedia.org/wiki/Special:FilePath/Citadel%20(old%20city)%20of%20Hewl%C3%AAr%20(Erbil).jpg?width=1600"
+               onerror="this.closest('.media').classList.add('media--fallback')" />
+        </figure>
 
-        <div class="history__cols">
-          <p class="history__p reveal">
-            هەولێر لە کۆنترین سەردەمانەوە ناوەندێکی گرنگی ژیان و بازرگانی بووە.
-            نامە کۆنەکان ناوی ئەم شارەیان تۆمار کردووە بە «ئەربیلوم»، شوێنێک کە
-            ئاشووری و بابلی و میدی و ئەخمینی و سەردەمانی دواتریش بەسەریدا
-            تێپەڕیون، بەڵام هەرگیز چۆڵ نەبووەتەوە.
+        <div class="s02__text">
+          <p class="eyebrow reveal">ئەوەی کە دەیبینیت</p>
+          <h2 class="section-title split" id="s02-title">تەپۆڵکەیەک لە چینی مێژوو</h2>
+          <p class="lead reveal">
+            قەڵا لەسەر تەپۆڵکەیەکی هێلکەیی دروستکراو دانراوە، نەک گردێکی سروشتی —
+            بەرهەمی هەزاران ساڵ ژیانی مرۆڤ کە چین لەسەر چین کەڵەکە بووە.
           </p>
-          <p class="history__p reveal">
-            قەڵا، کە بەرزایەکەی نزیکەی سی مەتر لە ئاستی دەوروبەری بەرزترە، لە
-            چینە لەسەر چینی ماڵ و کۆڵانی کۆن پێکهاتووە — هەر نەوەیەک لەسەر
-            کاولی نەوەی پێشوو خانووی خۆی بنیاد ناوە. لە ساڵی ٢٠١٤دا یونیسکۆ
-            قەڵای هەولێری کردە یەکێک لە شوێنە کەلەپووریە جیهانیەکان.
+          <p class="body reveal">
+            زیاتر لە سی مەتر لە پاشماوەی ئارکیۆلۆژی لەژێر خانووەکانی ئەمڕۆدا شاردراوەتەوە.
+            هەر نەوەیەک لەسەر کاولی نەوەی پێشوو ماڵی خۆی بنیاد ناوە.
           </p>
+
+          <!-- Cross-section of the tell: layers reveal bottom-to-top -->
+          <div class="tell reveal" role="img" aria-label="پرۆفایلی چینەکانی تەپۆڵکە، زیاتر لە ٣٠ مەتر">
+            <div class="tell__scale"><span>٣٠م+</span><span>٠م</span></div>
+            <div class="tell__stack">
+              <div class="tell__layer" style="--h:16%"><span>ئەمڕۆ</span></div>
+              <div class="tell__layer" style="--h:14%"><span>عوسمانی</span></div>
+              <div class="tell__layer" style="--h:16%"><span>ئیسلامی</span></div>
+              <div class="tell__layer" style="--h:14%"><span>ساسانی</span></div>
+              <div class="tell__layer" style="--h:18%"><span>هێلینی</span></div>
+              <div class="tell__layer" style="--h:22%"><span>ئاشووری — ئەربیلا</span></div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- ==========================================================
-         03 — Full-bleed parallax feature + centered caption
+         03 — HISTORY (dark, full-bleed). Horizontal pinned strip.
          ========================================================== -->
-    <section class="feature" aria-label="دیمەنی قەڵا">
-      <div class="feature__media media" data-parallax>
-        <img src="https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=2000&q=80"
-             alt="دیمەنی گشتی قەڵای هەولێر و شاری دەوروبەری" loading="lazy"
-             onerror="this.closest('.media').classList.add('media--fallback')" />
-        <div class="feature__vignette" aria-hidden="true"></div>
+    <section class="section section--dark s03" id="s03" aria-labelledby="s03-title">
+      <div class="s03__head wrap">
+        <span class="marker marker--flow" aria-hidden="true">٠٣</span>
+        <p class="eyebrow reveal">خەتی کات</p>
+        <h2 class="section-title split" id="s03-title">چەند شارستانیەت، یەک شوێن</h2>
       </div>
-      <p class="feature__cap reveal">قەڵای هەولێر — گەواهی زیندووی هەزاران ساڵ ژیان.</p>
+
+      <div class="strip" id="strip">
+        <div class="strip__track" id="strip-track">
+          <div class="strip__line" aria-hidden="true"></div>
+
+          <article class="era">
+            <figure class="era__img media"><img alt="ئەربیلای ئاشووری" loading="lazy" referrerpolicy="no-referrer"
+              src="https://commons.wikimedia.org/wiki/Special:FilePath/Panorama%20view%20of%20the%20Erbil%20Citadel%2C%20Erbil%20Governorate%2C%20Iraqi%20Kurdistan.jpg?width=1200"
+              onerror="this.closest('.media').classList.add('media--fallback')" /></figure>
+            <span class="era__node" aria-hidden="true"></span>
+            <h3 class="era__title">ئەربیلا</h3>
+            <p class="era__text">ناوەندێکی ئاشووری و پەرستگای ئیشتار.</p>
+          </article>
+
+          <article class="era">
+            <figure class="era__img media"><img alt="سەردەمی هێلینی" loading="lazy" referrerpolicy="no-referrer"
+              src="https://commons.wikimedia.org/wiki/Special:FilePath/46.%20Erbil%20Citadel%2C%20Erbil%20Governorate%2C%20Iraqi%20Kurdistan.jpg?width=1200"
+              onerror="this.closest('.media').classList.add('media--fallback')" /></figure>
+            <span class="era__node" aria-hidden="true"></span>
+            <h3 class="era__title">هێلینی</h3>
+            <p class="era__text">لەژێر کاریگەری یۆنانی و سلۆکییدا.</p>
+          </article>
+
+          <article class="era">
+            <figure class="era__img media"><img alt="سەردەمی ساسانی" loading="lazy" referrerpolicy="no-referrer"
+              src="https://commons.wikimedia.org/wiki/Special:FilePath/133.%20Interior%20of%20Erbil%20Citadel%2C%20Hawler%2C%20Erbil%20Governorate%2C%20Iraq.jpg?width=1200"
+              onerror="this.closest('.media').classList.add('media--fallback')" /></figure>
+            <span class="era__node" aria-hidden="true"></span>
+            <h3 class="era__title">ساسانی</h3>
+            <p class="era__text">ناوچەیەکی گرنگی ئایینی و بازرگانی.</p>
+          </article>
+
+          <article class="era">
+            <figure class="era__img media"><img alt="سەردەمی ئیسلامی — منارە" loading="lazy" referrerpolicy="no-referrer"
+              src="https://commons.wikimedia.org/wiki/Special:FilePath/Erbil%20Minaret%2C%20Erbil%2C%20Kurdistan%20Region%20of%20Iraq.JPG?width=1200"
+              onerror="this.closest('.media').classList.add('media--fallback')" /></figure>
+            <span class="era__node" aria-hidden="true"></span>
+            <h3 class="era__title">ئیسلامی</h3>
+            <p class="era__text">منارەی موزەفەری، یادگاری سەردەمی کۆکبوری.</p>
+          </article>
+
+          <article class="era">
+            <figure class="era__img media"><img alt="سەردەمی عوسمانی — دەروازە" loading="lazy" referrerpolicy="no-referrer"
+              src="https://commons.wikimedia.org/wiki/Special:FilePath/Gate%20to%20the%20Erbil%20Citadel.jpg?width=1200"
+              onerror="this.closest('.media').classList.add('media--fallback')" /></figure>
+            <span class="era__node" aria-hidden="true"></span>
+            <h3 class="era__title">عوسمانی</h3>
+            <p class="era__text">شێوەی بازنەیی کۆڵانەکان لەم سەردەمەوەیە.</p>
+          </article>
+
+          <article class="era">
+            <figure class="era__img media"><img alt="هەولێری ئەمڕۆ" loading="lazy" referrerpolicy="no-referrer"
+              src="https://commons.wikimedia.org/wiki/Special:FilePath/View%20of%20Erbil%20skyline%20from%20the%20Citadel%20in%20the%20Kurdistan%20Region%20of%20Iraq%2003.jpg?width=1200"
+              onerror="this.closest('.media').classList.add('media--fallback')" /></figure>
+            <span class="era__node" aria-hidden="true"></span>
+            <h3 class="era__title">ئەمڕۆ</h3>
+            <p class="era__text">لە ٢٠١٤ کرا بە کەلەپووری جیهانی؛ چاکسازی بەردەوامە.</p>
+          </article>
+        </div>
+      </div>
     </section>
 
     <!-- ==========================================================
-         04 — Three cards separated by thin gold hairlines
+         04 — THE LIVING CITADEL (cream). Editorial photo grid.
          ========================================================== -->
-    <section class="cards" id="places" aria-labelledby="places-title">
+    <section class="section section--cream s04" id="s04" aria-labelledby="s04-title">
       <span class="marker marker--left" aria-hidden="true">٠٤</span>
       <div class="wrap">
-        <p class="eyebrow reveal">گەشتێک بەناو شاردا</p>
-        <h2 class="section-title split" id="places-title">شوێن و ژیان لە هەولێر</h2>
+        <div class="s04__intro">
+          <p class="eyebrow reveal">ژیانی ناو دیوارەکان</p>
+          <h2 class="section-title split" id="s04-title">قەڵای زیندوو</h2>
+        </div>
 
-        <div class="cards__row">
-          <article class="card reveal">
-            <svg class="card__icon icon-citadel" viewBox="0 0 48 32" aria-hidden="true"><use href="#citadel-icon"></use></svg>
-            <h3 class="card__title">شوێنە گرنگەکان</h3>
-            <p class="card__text">قەڵا، منارەی موزەفەری و بازاڕی قەیسەری — دڵی کۆنی شار بەناو کۆڵانە تەنگەکاندا.</p>
-            <a href="#contact" class="link-arrow"><span>بینین</span><span class="link-arrow__i" aria-hidden="true">←</span></a>
+        <div class="s04__grid">
+          <figure class="s04__cell s04__cell--tall media reveal-clip" data-parallax>
+            <img alt="کۆڵانێک لە ناو دیوارەکانی قەڵا" loading="lazy" referrerpolicy="no-referrer"
+              src="https://commons.wikimedia.org/wiki/Special:FilePath/Erbil%20Citadel%2001.jpg?width=1200"
+              onerror="this.closest('.media').classList.add('media--fallback')" />
+            <figcaption class="media__cap">کۆڵانەکانی ناو قەڵا</figcaption>
+          </figure>
+
+          <p class="s04__note reveal">
+            لە ناو دیوارەکاندا، کۆڵانە تەنگەکان، خانووە کۆنەکان و مۆزەخانەی
+            تەکستیلی کوردی چیرۆکی ژیانی ڕۆژانە دەگێڕنەوە.
+          </p>
+
+          <figure class="s04__cell s04__cell--wide media reveal-clip" data-parallax>
+            <img alt="ناوەوەی مۆزەخانەی تەکستیلی کوردی" loading="lazy" referrerpolicy="no-referrer"
+              src="https://commons.wikimedia.org/wiki/Special:FilePath/A%20traditional%20Kurdish%20house%20interior%2C%20Kurdish%20Textile%20and%20Cultural%20Museum%2C%20Citadel%20of%20Erbil.jpg?width=1400"
+              onerror="this.closest('.media').classList.add('media--fallback')" />
+            <figcaption class="media__cap">مۆزەخانەی تەکستیلی کوردی</figcaption>
+          </figure>
+
+          <figure class="s04__cell media reveal-clip" data-parallax>
+            <img alt="جلوبەرگی نەریتی کوردی" loading="lazy" referrerpolicy="no-referrer"
+              src="https://commons.wikimedia.org/wiki/Special:FilePath/Kurdish%20Costumes%20on%20Display%20-%20Kurdish%20Textile%20Museum%20-%20Erbil%20-%20Iraq.jpg?width=1000"
+              onerror="this.closest('.media').classList.add('media--fallback')" />
+            <figcaption class="media__cap">جل و بەرگی نەریتی</figcaption>
+          </figure>
+
+          <figure class="s04__cell media reveal-clip" data-parallax>
+            <img alt="کاری چاکسازی و مۆزەخانە" loading="lazy" referrerpolicy="no-referrer"
+              src="https://commons.wikimedia.org/wiki/Special:FilePath/Kurdish%20Textile%20Museum%2C%20Erbil%20Citadel%2C%20Hawler%2C%20Iraq.jpg?width=1000"
+              onerror="this.closest('.media').classList.add('media--fallback')" />
+            <figcaption class="media__cap">چاکسازی بەردەوام</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         05 — AROUND THE CITADEL (dark). Three tall photo cards.
+         ========================================================== -->
+    <section class="section section--dark s05" id="s05" aria-labelledby="s05-title">
+      <span class="marker" aria-hidden="true">٠٥</span>
+      <div class="wrap">
+        <div class="s05__intro">
+          <p class="eyebrow reveal">دەوروبەری قەڵا</p>
+          <h2 class="section-title split" id="s05-title">لە دەوری قەڵادا</h2>
+        </div>
+
+        <div class="s05__row">
+          <article class="pcard reveal">
+            <div class="pcard__media media" data-parallax-card>
+              <img alt="بازاڕی قەیسەری" loading="lazy" referrerpolicy="no-referrer"
+                src="https://commons.wikimedia.org/wiki/Special:FilePath/View%20of%20the%20covered%20bazar%20(bazari%20qaysari)%20in%20Erbil%2C%20the%20Kurdistan%20Region%20DSF1597.jpg?width=1200"
+                onerror="this.closest('.media').classList.add('media--fallback')" />
+            </div>
+            <h3 class="pcard__title">بازاڕی قەیسەری</h3>
+            <p class="pcard__text">بازاڕێکی داپۆشراوی کۆن، هەر لە دامێنی قەڵاوە.</p>
           </article>
 
-          <article class="card reveal">
-            <svg class="card__icon" viewBox="0 0 40 40" aria-hidden="true"><use href="#arch-icon"></use></svg>
-            <h3 class="card__title">مێژوو و شارستانیەت</h3>
-            <p class="card__text">چیرۆکی چەندین شارستانیەت کە بەسەر ئەم تەپۆڵکەیەدا تێپەڕیون و شوێنیان جێهێشتووە.</p>
-            <a href="#history" class="link-arrow"><span>خوێندنەوە</span><span class="link-arrow__i" aria-hidden="true">←</span></a>
+          <article class="pcard reveal">
+            <div class="pcard__media media" data-parallax-card>
+              <img alt="منارەی موزەفەری" loading="lazy" referrerpolicy="no-referrer"
+                src="https://commons.wikimedia.org/wiki/Special:FilePath/Erbil%20Minaret%2C%20Erbil%2C%20Kurdistan%20Region%20of%20Iraq.JPG?width=1200"
+                onerror="this.closest('.media').classList.add('media--fallback')" />
+            </div>
+            <h3 class="pcard__title">منارەی موزەفەری</h3>
+            <p class="pcard__text">منارەیەکی مێژوویی لە پارکی منارە.</p>
           </article>
 
-          <article class="card reveal">
-            <svg class="card__icon" viewBox="0 0 40 40" aria-hidden="true"><use href="#star-icon"></use></svg>
-            <h3 class="card__title">کولتور و ژیان</h3>
-            <p class="card__text">چای، بازاڕ و میوانداری — ژیانی ڕۆژانەی خەڵکی هەولێر لە دەوری قەڵادا.</p>
-            <a href="#contact" class="link-arrow"><span>ناسین</span><span class="link-arrow__i" aria-hidden="true">←</span></a>
+          <article class="pcard reveal">
+            <div class="pcard__media media" data-parallax-card>
+              <img alt="پارکی شانەدەر" loading="lazy" referrerpolicy="no-referrer"
+                src="https://commons.wikimedia.org/wiki/Special:FilePath/Shanadar%20park%20erbil.jpg?width=1200"
+                onerror="this.closest('.media').classList.add('media--fallback')" />
+            </div>
+            <h3 class="pcard__title">پارکی شانەدەر</h3>
+            <p class="pcard__text">پارکێکی سەوز لە تەنیشت قەڵا بۆ پشوودان.</p>
           </article>
         </div>
       </div>
     </section>
 
     <!-- ==========================================================
-         Footer. Quiet, hand-drawn citadel skyline line-art.
+         06 — VISIT + FOOTER (cream).
          ========================================================== -->
-    <footer class="footer" id="contact">
-      <div class="wrap footer__inner">
-        <a class="footer__logo" href="#top" aria-label="هەولێر — Erbil Citadel">
-          <svg class="icon-citadel" viewBox="0 0 48 32" aria-hidden="true"><use href="#citadel-icon"></use></svg>
-          <span class="footer__logo-text">
-            <span class="nav__logo-ku">هەولێر</span>
-            <span class="nav__logo-en">Erbil Citadel</span>
-          </span>
-        </a>
-        <p class="footer__line reveal">هەولێر، شارێک لە مێژوو، کولتور و ناسنامەدا — هەر لە ئێستا و داهاتووشدا دەدرەوشێتەوە.</p>
-        <a href="mailto:info@erbilcitadel.krd" class="footer__mail link-arrow"><span>info@erbilcitadel.krd</span></a>
+    <section class="section section--cream s06" id="s06" aria-labelledby="s06-title">
+      <span class="marker marker--left" aria-hidden="true">٠٦</span>
+      <div class="wrap s06__grid">
+        <div class="s06__lead">
+          <p class="eyebrow reveal">سەردان</p>
+          <h2 class="section-title split" id="s06-title">سەردانی قەڵا بکە</h2>
+          <p class="body reveal">
+            قەڵا بەردەوام سەردانی بۆ دەکرێت و کاری چاکسازیشی تێدا بەردەوامە.
+            باشترین کاتی سەردان بەیانیان یان دەمەو ئێوارەیە.
+          </p>
+        </div>
+
+        <ul class="s06__facts">
+          <li class="reveal"><span class="s06__k">چوونەژوورەوە</span><span class="s06__v">بەخۆڕایی لە دەروازەی سەرەکییەوە</span></li>
+          <li class="reveal"><span class="s06__k">مۆزەخانەی تەکستیل</span><span class="s06__v">کاتژمێری سنووردار</span></li>
+          <li class="reveal"><span class="s06__k">باشترین کات</span><span class="s06__v">بەیانی یان دەمەو ئێوارە</span></li>
+          <li class="reveal"><span class="s06__k">ئێوارەی هەینی</span><span class="s06__v">قەرەباڵغتر دەبێت</span></li>
+        </ul>
       </div>
 
-      <svg class="footer__skyline" viewBox="0 0 1200 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><use href="#skyline"></use></svg>
-      <p class="footer__meta">© <span id="year">2026</span> Erbil Citadel · هەولێر</p>
-    </footer>
+      <footer class="footer">
+        <div class="wrap footer__inner">
+          <a class="footer__logo" href="#top" aria-label="هەولێر — Erbil Citadel">
+            <svg class="icon-citadel" viewBox="0 0 48 32" aria-hidden="true"><use href="#citadel-icon"></use></svg>
+            <span class="footer__logo-text"><span class="nav__logo-ku">هەولێر</span><span class="nav__logo-en">Erbil Citadel</span></span>
+          </a>
+          <p class="footer__line reveal">شارێک لە مێژوو، کولتور و ناسنامەدا — هەر لە ئێستا و داهاتووشدا دەدرەوشێتەوە.</p>
+          <a href="mailto:info@erbilcitadel.krd" class="footer__mail link-arrow"><span>info@erbilcitadel.krd</span></a>
+        </div>
+        <svg class="footer__skyline" viewBox="0 0 1200 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><use href="#skyline"></use></svg>
+        <p class="footer__meta">© <span id="year">2026</span> Erbil Citadel · هەولێر · وێنەکان: Wikimedia Commons</p>
+      </footer>
+    </section>
 
   </main>
 
   <!-- ============================================================
-       SVG SPRITE — line-art icons (defined once, reused)
+       SVG SPRITE
        ============================================================ -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
-      <g id="citadel-icon" fill="none" stroke="currentColor" stroke-width="1.4"
-         stroke-linejoin="round" stroke-linecap="round">
+      <g id="citadel-icon" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">
         <path d="M2 30 H46 M4 30 V16 M8 16 V13 M8 13 H4 V16 M12 30 V12 M12 12 H16 V30
                  M20 30 V10 M20 10 H24 V6 H28 V10 H32 V30 M36 30 V12 H40 V30
                  M44 30 V16 M40 16 H44 M36 12 V9 H40 V12" />
         <path d="M25 6 V3 M23.5 4.5 L26.5 4.5" />
         <rect x="22" y="14" width="4" height="16" />
       </g>
-      <g id="arch-icon" fill="none" stroke="currentColor" stroke-width="1.4"
-         stroke-linecap="round" stroke-linejoin="round">
-        <path d="M8 38 V16 C8 8 14 3 20 3 C26 3 32 8 32 16 V38" />
-        <path d="M14 38 V20 C14 14 17 11 20 11 C23 11 26 14 26 20 V38" />
-        <path d="M20 3 V0" />
+      <g id="citadel-mark" fill="none" stroke="var(--gold)" stroke-width="1" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M4 46 H92 M10 46 V26 L18 26 L18 20 L24 20 L24 26 L40 26 L40 46
+                 M40 46 V16 L48 10 L56 16 L56 46 M56 46 V26 L72 26 L72 20 L78 20 L78 26 L86 26 L86 46 M48 10 V4" />
       </g>
-      <g id="star-icon" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">
-        <path d="M20 3 L24 12 L33 8 L29 17 L38 20 L29 23 L33 32 L24 28 L20 37
-                 L16 28 L7 32 L11 23 L2 20 L11 17 L7 8 L16 12 Z" />
+      <g id="compass-icon" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">
+        <circle cx="12" cy="12" r="9"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M15 9l-2.4 5.6L9 15l3-6z"/>
+      </g>
+      <g id="clock-icon" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">
+        <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
       </g>
       <g id="skyline" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
         <path d="M0 118 H1200
@@ -259,12 +434,6 @@
                  M920 118 V58 C920 44 934 38 946 38 C958 38 972 44 972 58 V118
                  M1010 118 V68 L1030 68 L1030 60 L1038 60 L1038 68 L1110 68 V118
                  M1150 118 V52 L1165 52 L1165 46 L1172 46 L1172 52 L1185 52 L1185 118" />
-      </g>
-      <!-- Faint citadel watermark used inside image fallbacks -->
-      <g id="citadel-mark" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round" stroke-linecap="round">
-        <path d="M4 46 H92 M10 46 V26 L18 26 L18 20 L24 20 L24 26 L40 26 L40 46
-                 M40 46 V16 L48 10 L56 16 L56 46 M56 46 V26 L72 26 L72 20 L78 20 L78 26 L86 26 L86 46" />
-        <path d="M48 10 V4" />
       </g>
     </defs>
   </svg>
