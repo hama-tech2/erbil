@@ -1,1 +1,466 @@
+/* ============================================================
+   هەولێر · Erbil — cinematic scrollytelling
+   Dark stone + gold. Cinzel (display) · Cairo (Sorani/body).
+   ============================================================ */
 
+:root {
+  --bg:     #0B0B0D;
+  --panel:  #16130F;
+  --gold:   #C9A24B;
+  --sand:   #E8D5A8;
+  --text:   #F5F1E8;
+  --muted:  #9A948A;
+
+  --display: "Cinzel", serif;
+  --body:    "Cairo", system-ui, sans-serif;
+
+  --wrap: 68rem;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-weight: 400;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+img, video { display: block; max-width: 100%; }
+
+::selection { background: var(--gold); color: #14100a; }
+
+.wrap {
+  width: min(var(--wrap), 90vw);
+  margin-inline: auto;
+}
+
+/* Shared eyebrow + titles ---------------------------------- */
+.eyebrow {
+  font-family: var(--display);
+  font-size: 0.78rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.1rem;
+}
+
+.section-title {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(1.9rem, 6vw, 3.4rem);
+  line-height: 1.15;
+  color: var(--sand);
+  margin-bottom: 1.6rem;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero {
+  position: relative;
+  height: 100svh;
+  min-height: 34rem;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.hero__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(120% 90% at 50% 30%, transparent 0%, rgba(11,11,13,0.35) 55%, rgba(11,11,13,0.9) 100%),
+    linear-gradient(180deg, rgba(11,11,13,0.55) 0%, rgba(11,11,13,0.25) 40%, rgba(11,11,13,0.95) 100%);
+}
+
+.hero__content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding-inline: 1.4rem;
+}
+
+.hero__eyebrow {
+  font-family: var(--display);
+  font-size: clamp(0.72rem, 2.4vw, 0.9rem);
+  letter-spacing: 0.4em;
+  color: var(--gold);
+  margin-bottom: 1.4rem;
+}
+
+.hero__title {
+  font-family: var(--body);
+  font-weight: 700;
+  font-size: clamp(4.5rem, 22vw, 12rem);
+  line-height: 0.95;
+  color: var(--text);
+  text-shadow: 0 0.4rem 3rem rgba(0,0,0,0.6);
+}
+
+.hero__sub {
+  margin-top: 1.2rem;
+  font-size: clamp(1rem, 3.6vw, 1.5rem);
+  color: var(--sand);
+  font-weight: 300;
+}
+
+.hero__hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+}
+
+.hero__arrow {
+  font-size: 1.2rem;
+  color: var(--gold);
+  animation: bob 2s var(--ease) infinite;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); opacity: 0.7; }
+  50%      { transform: translateY(0.4rem); opacity: 1; }
+}
+
+/* ============================================================
+   SECTION 2 — YEAR COUNTER (signature)
+   ============================================================ */
+.era {
+  position: relative;
+  /* tall scroll track that gets pinned by GSAP */
+  height: 500vh;
+  background: var(--bg);
+}
+
+.era__pin {
+  height: 100svh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+/* radial vignette that JS darkens as the year ages */
+.era__pin::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(80% 70% at 50% 50%, rgba(201,162,75,0.05), transparent 70%);
+  opacity: var(--era-glow, 1);
+  transition: opacity 0.2s linear;
+  pointer-events: none;
+}
+
+.era__stage {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding-inline: 1.4rem;
+}
+
+.era__eyebrow {
+  font-family: var(--display);
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  font-size: 0.76rem;
+  color: var(--gold);
+  margin-bottom: 1.4rem;
+  opacity: 0.85;
+}
+
+.era__year {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.4rem;
+  direction: ltr;
+}
+
+.era__num {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(5rem, 26vw, 18rem);
+  line-height: 0.9;
+  color: var(--sand);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0.5rem 4rem rgba(0,0,0,0.7);
+}
+
+.era__suffix {
+  font-family: var(--display);
+  font-size: clamp(1.2rem, 5vw, 2.6rem);
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.era__caption {
+  margin-top: 1.6rem;
+  font-size: clamp(1rem, 3.6vw, 1.4rem);
+  color: var(--text);
+  min-height: 2.6em;
+  max-width: 30ch;
+  margin-inline: auto;
+  font-weight: 300;
+}
+
+/* Static fallback list (reduced motion / no GSAP) */
+.era__list {
+  list-style: none;
+  margin-top: 2rem;
+  display: grid;
+  gap: 1.4rem;
+  text-align: start;
+}
+
+.era__item {
+  border-inline-start: 2px solid var(--gold);
+  padding-inline-start: 1.2rem;
+}
+
+.era__item-year {
+  display: block;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(1.8rem, 8vw, 3rem);
+  color: var(--sand);
+}
+
+.era__item-cap {
+  display: block;
+  color: var(--muted);
+  margin-top: 0.2rem;
+}
+
+/* ============================================================
+   SECTION 3 — ABOUT
+   ============================================================ */
+.about {
+  background: var(--bg);
+  padding: clamp(5rem, 14vw, 9rem) 0;
+  border-top: 1px solid rgba(201,162,75,0.12);
+}
+
+.lead {
+  font-size: clamp(1.1rem, 4vw, 1.55rem);
+  line-height: 1.85;
+  max-width: 44ch;
+}
+
+.lead--muted {
+  color: var(--muted);
+  margin-top: 1.4rem;
+  font-size: clamp(1rem, 3.4vw, 1.3rem);
+}
+
+/* ============================================================
+   SECTION 4 — CITADEL
+   ============================================================ */
+.citadel {
+  background: linear-gradient(180deg, var(--bg), var(--panel));
+  padding: clamp(5rem, 14vw, 9rem) 0;
+}
+
+.facts {
+  margin-top: 3rem;
+  display: grid;
+  gap: 1.2rem;
+  grid-template-columns: 1fr;
+}
+
+.fact {
+  background: rgba(11,11,13,0.5);
+  border: 1px solid rgba(201,162,75,0.16);
+  border-radius: 0.4rem;
+  padding: 2rem 1.8rem;
+}
+
+.fact__mark {
+  display: block;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--gold);
+  margin-bottom: 0.9rem;
+  direction: ltr;
+}
+
+.fact__title {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 1.25rem;
+  color: var(--sand);
+  margin-bottom: 0.7rem;
+}
+
+.fact__text {
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+/* ============================================================
+   SECTION 5 — GALLERY
+   ============================================================ */
+.gallery {
+  background: var(--panel);
+  padding: clamp(5rem, 14vw, 9rem) 0;
+}
+
+.grid {
+  margin-top: 3rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.shot {
+  position: relative;
+  border-radius: 0.4rem;
+  min-height: 12rem;
+  overflow: hidden;
+  border: 1px solid rgba(201,162,75,0.14);
+  background:
+    repeating-linear-gradient(135deg, rgba(201,162,75,0.05) 0 12px, transparent 12px 24px),
+    linear-gradient(160deg, #1c1813, #0e0c0a);
+  display: grid;
+  place-items: center;
+}
+
+.shot--tall { grid-row: span 2; min-height: 25rem; }
+.shot--wide { grid-column: 1 / -1; min-height: 14rem; }
+
+.shot__label {
+  font-family: var(--display);
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer {
+  background: var(--bg);
+  padding: clamp(5rem, 14vw, 8rem) 0 4rem;
+  text-align: center;
+  border-top: 1px solid rgba(201,162,75,0.12);
+}
+
+.footer__eyebrow {
+  font-family: var(--display);
+  letter-spacing: 0.36em;
+  font-size: 0.74rem;
+  color: var(--gold);
+  margin-bottom: 1.2rem;
+}
+
+.footer__name {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(2rem, 8vw, 3.4rem);
+  color: var(--sand);
+  margin-bottom: 1rem;
+}
+
+.footer__line {
+  color: var(--text);
+  font-size: 1.1rem;
+  max-width: 36ch;
+  margin-inline: auto;
+  margin-bottom: 2rem;
+}
+
+.footer__cta {
+  display: inline-block;
+  font-family: var(--display);
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  color: #14100a;
+  background: var(--gold);
+  padding: 0.85rem 2.4rem;
+  border-radius: 0.3rem;
+  transition: transform 0.25s var(--ease), background 0.25s var(--ease);
+}
+
+.footer__cta:hover,
+.footer__cta:focus-visible {
+  transform: translateY(-2px);
+  background: var(--sand);
+}
+
+.footer__meta {
+  margin-top: 3rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+}
+
+/* ============================================================
+   Reveal base state (JS animates to visible)
+   ============================================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(2.2rem);
+  will-change: transform, opacity;
+}
+
+/* Accessibility -------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Larger screens ------------------------------------------- */
+@media (min-width: 48rem) {
+  .facts { grid-template-columns: repeat(3, 1fr); }
+  .grid  { grid-template-columns: repeat(3, 1fr); }
+  .shot  { min-height: 15rem; }
+  .shot--tall { min-height: 100%; }
+}
+
+/* Static fallback (no GSAP): collapse the tall scroll track */
+.no-anim .era { height: auto; }
+.no-anim .era__pin {
+  height: auto;
+  min-height: auto;
+  display: block;
+  padding: clamp(5rem, 14vw, 8rem) 0;
+}
+.no-anim .era__stage { margin-inline: auto; width: min(var(--wrap), 90vw); }
+
+/* Reduced motion: no transforms, everything visible & static */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1 !important; transform: none !important; }
+  .hero__arrow { animation: none; }
+  .era { height: auto; }
+  .era__pin { min-height: 60svh; }
+}

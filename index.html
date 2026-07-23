@@ -1,1 +1,151 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0B0B0D" />
+  <title>هەولێر — کۆنترین شاری زیندووی جیهان</title>
+  <meta name="description" content="هەولێر (Erbil) — کۆنترین شاری بەردەوام نیشتەجێبووی سەر زەوی. گێڕانەوەیەکی سینەمایی بە خوارەوەبردن." />
 
+  <!-- Google Fonts: Cinzel (display) + Cairo (Sorani/body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ================= HERO ================= -->
+  <header class="hero" id="hero">
+    <video
+      class="hero__video"
+      autoplay muted loop playsinline preload="auto">
+      <source src="hero-background.mp4" type="video/mp4" />
+      <source src="https://github.com/hama-tech2/erbil/raw/refs/heads/main/hero-background.mp4" type="video/mp4" />
+    </video>
+    <div class="hero__overlay"></div>
+
+    <div class="hero__content">
+      <p class="hero__eyebrow">KURDISTAN · هەولێر</p>
+      <h1 class="hero__title">هەولێر</h1>
+      <p class="hero__sub">کۆنترین شاری بەردەوام نیشتەجێبووی جیهان</p>
+    </div>
+
+    <a class="hero__hint" href="#era">
+      <span>بۆ خوارەوە بڕۆ</span>
+      <span class="hero__arrow" aria-hidden="true">↓</span>
+    </a>
+  </header>
+
+  <!-- ============ SECTION 2 — YEAR COUNTER (signature) ============ -->
+  <section class="era" id="era" aria-label="ساڵ بەرەو کۆنایەتی">
+    <div class="era__pin">
+      <div class="era__stage">
+        <p class="era__eyebrow">بگەڕێوە بۆ سەردەمان</p>
+        <div class="era__year">
+          <span class="era__num" id="eraNum" aria-live="polite">2026</span>
+          <span class="era__suffix" id="eraSuffix">ز</span>
+        </div>
+        <p class="era__caption" id="eraCaption">هەولێری ئەمڕۆ — شارێکی زیندوو و چالاک</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 3 — ABOUT ================= -->
+  <section class="about" id="about">
+    <div class="wrap reveal">
+      <p class="eyebrow">دەربارەی هەولێر</p>
+      <h2 class="section-title">شارێک کە هەرگیز نەوەستاوە</h2>
+      <p class="lead">
+        هەولێر یەکێکە لە کۆنترین شارەکانی جیهان کە بەردەوام مرۆڤی تێیدا ژیاوە.
+        بۆ زیاتر لە شەش هەزار ساڵ، چرای ژیانی تێدا نەکوژاوەتەوە.
+      </p>
+      <p class="lead lead--muted">
+        لەسەر تەپۆڵکەیەکی بەرزی دەستکردەوە، قەڵا سەیری شار دەکات — گەواهی
+        هەزاران ساڵ لە ژیان، بازرگانی و چیرۆک.
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 4 — THE CITADEL ================= -->
+  <section class="citadel" id="citadel">
+    <div class="wrap">
+      <div class="reveal">
+        <p class="eyebrow">قەڵای هەولێر</p>
+        <h2 class="section-title">دڵی کۆنی شار</h2>
+      </div>
+
+      <div class="facts">
+        <article class="fact reveal">
+          <span class="fact__mark">٦٠٠٠+</span>
+          <h3 class="fact__title">ساڵ لە مێژوو</h3>
+          <p class="fact__text">
+            توێژینەوەکان دەیسەلمێنن کە نیشتەجێبوون لەم شوێنە بۆ زیاتر لە شەش
+            هەزار ساڵ بەردەوام بووە.
+          </p>
+        </article>
+
+        <article class="fact reveal">
+          <span class="fact__mark">UNESCO</span>
+          <h3 class="fact__title">کەلەپووری جیهانی</h3>
+          <p class="fact__text">
+            قەڵای هەولێر لە ساڵی ٢٠١٤ کرایە یەکێک لە شوێنە کەلەپووریە جیهانیەکانی
+            یونیسکۆ.
+          </p>
+        </article>
+
+        <article class="fact reveal">
+          <span class="fact__mark">هەرگیز</span>
+          <h3 class="fact__title">بەتاڵ نەبووە</h3>
+          <p class="fact__text">
+            بەگوێرەی زۆرێک لە لێکۆڵینەوەکان، قەڵا هەرگیز بە تەواوی چۆڵ نەکراوە —
+            هەمیشە ژیانی تێدا بووە.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 5 — GALLERY ================= -->
+  <section class="gallery" id="gallery">
+    <div class="wrap">
+      <div class="reveal">
+        <p class="eyebrow">گەلەری</p>
+        <h2 class="section-title">دیمەنی شار</h2>
+      </div>
+
+      <div class="grid">
+        <figure class="shot shot--tall reveal" role="img" aria-label="شوێنی وێنە">
+          <span class="shot__label">وێنە ١</span>
+        </figure>
+        <figure class="shot reveal" role="img" aria-label="شوێنی وێنە">
+          <span class="shot__label">وێنە ٢</span>
+        </figure>
+        <figure class="shot reveal" role="img" aria-label="شوێنی وێنە">
+          <span class="shot__label">وێنە ٣</span>
+        </figure>
+        <figure class="shot shot--wide reveal" role="img" aria-label="شوێنی وێنە">
+          <span class="shot__label">وێنە ٤</span>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="footer">
+    <div class="wrap reveal">
+      <p class="footer__eyebrow">HAWLER · KURDISTAN</p>
+      <h2 class="footer__name">هەلۆ تێک</h2>
+      <p class="footer__line">من ماڵپەڕی وەک ئەمە دروست دەکەم — پەیوەندیم پێوە بکە.</p>
+      <a class="footer__cta" href="mailto:w70612319@gmail.com">پەیوەندی</a>
+      <p class="footer__meta">© <span id="year">2026</span> هەولێر</p>
+    </div>
+  </footer>
+
+  <!-- GSAP + ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
