@@ -1,7 +1,7 @@
 /* ============================================================
    هەولێر · Erbil Citadel — scrollytelling behaviour
    GSAP + ScrollTrigger. Scroll-scrubbed hero video.
-   Degrades gracefully; respects prefers-reduced-motion.
+   Respects prefers-reduced-motion; degrades without GSAP.
    ============================================================ */
 
 (function () {
@@ -24,10 +24,7 @@
 
     setupNav();
 
-    if (reduceMotion || !hasGSAP) {
-      staticFallback();
-      return;
-    }
+    if (reduceMotion || !hasGSAP) { staticFallback(); return; }
 
     if (!isTouch) setupCursor();
     splitHeadings();
@@ -36,36 +33,27 @@
     setupParallax();
     setupClipReveals();
     if (!isTouch) setupMagnetic();
-
-    // Orchestrated page-load sequence (nav + hero text)
     introSequence();
   }
 
   /* ----------------------------------------------------------
-     NAV — fade to a solid sand bar + active link diamond
+     NAV
      ---------------------------------------------------------- */
   function setupNav() {
     var nav = document.getElementById("nav");
     var onScroll = function () {
-      if (window.scrollY > window.innerHeight * 0.6) nav.classList.add("is-solid");
-      else nav.classList.remove("is-solid");
+      nav.classList.toggle("is-solid", window.scrollY > window.innerHeight * 0.6);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
 
-    // Scroll-spy for the active gold diamond
     var links = Array.prototype.slice.call(document.querySelectorAll(".nav__link"));
-    var sections = links
-      .map(function (l) { return document.querySelector(l.getAttribute("href")); })
-      .filter(Boolean);
-
+    var sections = links.map(function (l) { return document.querySelector(l.getAttribute("href")); }).filter(Boolean);
     if ("IntersectionObserver" in window && sections.length) {
       var io = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
           if (!e.isIntersecting) return;
-          links.forEach(function (l) {
-            l.classList.toggle("is-active", l.getAttribute("href") === "#" + e.target.id);
-          });
+          links.forEach(function (l) { l.classList.toggle("is-active", l.getAttribute("href") === "#" + e.target.id); });
         });
       }, { rootMargin: "-45% 0px -50% 0px" });
       sections.forEach(function (s) { io.observe(s); });
@@ -74,6 +62,14 @@
 
   /* ----------------------------------------------------------
      HERO — pinned, scroll-scrubbed Earth-zoom video
+
+     The scroll is split into two phases across the pin:
+       0 .. VIDEO_END : the video scrubs through its FULL length
+                        (space -> citadel), and the three lines
+                        leave one by one (right, left, right).
+       VIDEO_END .. 1 : the video holds on its LAST frame while the
+                        three lines return and the CTA appears — this
+                        is the extra "hold" after the video finishes.
      ---------------------------------------------------------- */
   function setupHero() {
     var hero = document.getElementById("hero");
@@ -83,14 +79,15 @@
     var l2 = hero.querySelector(".hero__line--2");
     var l3 = hero.querySelector(".hero__line--3");
     var cta = hero.querySelector(".hero__cta");
-    var scrollHint = hero.querySelector(".hero__scroll");
+    var hint = hero.querySelector(".hero__scroll");
 
-    // iOS unlock: on first interaction, play then immediately pause so the
-    // frame buffer becomes seekable.
+    var VIDEO_END = 0.80;                 // video reaches its last frame at 80% of the scroll
+    var pinLength = isMobile ? "+=240%" : "+=520%";
+
+    // iOS/Safari unlock so the video becomes seekable.
     var unlocked = false;
     function unlock() {
-      if (unlocked) return;
-      unlocked = true;
+      if (unlocked) return; unlocked = true;
       var p = video.play();
       if (p && p.then) p.then(function () { video.pause(); }).catch(function () {});
       else { try { video.pause(); } catch (e) {} }
@@ -99,115 +96,93 @@
       window.addEventListener(ev, unlock, { once: true, passive: true });
     });
 
-    // Detect whether frame-accurate scrubbing is supported.
-    var canScrub = true;
-    // Shorter pin on mobile for a lighter experience.
-    var pinLength = isMobile ? "+=180%" : "+=400%";
-
-    // --- Smooth video scrubbing: lerp currentTime toward a target ---
-    var target = 0, current = 0, duration = 0;
+    // --- Single-smoothing video scrub -------------------------------
+    var duration = 0, target = 0, current = 0, canScrub = true;
     function onMeta() { duration = video.duration || 0; }
     if (video.readyState >= 1) onMeta();
     video.addEventListener("loadedmetadata", onMeta);
 
-    var rafId;
     function rafLoop() {
       if (duration) {
-        current += (target - current) * 0.12;              // smoothing
-        if (Math.abs(target - current) < 0.001) current = target;
+        // ease currentTime toward the scroll-derived target
+        current += (target - current) * 0.15;
+        if (Math.abs(target - current) < 0.004) current = target;
         try { video.currentTime = current; } catch (e) { canScrub = false; }
       }
-      rafId = requestAnimationFrame(rafLoop);
+      requestAnimationFrame(rafLoop);
     }
-    rafId = requestAnimationFrame(rafLoop);
+    requestAnimationFrame(rafLoop);
 
-    // --- The scrubbed text-choreography timeline, tied to the pin ---
+    // --- Choreography timeline (scrubbed, pins the hero) ------------
     var tl = gsap.timeline({
-      defaults: { ease: "none" },
+      defaults: { ease: "power1.inOut" },
       scrollTrigger: {
-        trigger: hero,
-        start: "top top",
-        end: pinLength,
-        pin: pin,
-        scrub: isMobile ? 0.5 : 1,
-        anticipatePin: 1,
+        trigger: hero, start: "top top", end: pinLength,
+        pin: pin, scrub: isMobile ? 0.6 : 1, anticipatePin: 1,
         onUpdate: function (self) {
-          if (duration) target = self.progress * (duration - 0.05);
+          if (!duration) return;
+          // Map the first VIDEO_END of scroll to the whole clip; hold after.
+          var v = self.progress / VIDEO_END; if (v > 1) v = 1;
+          target = v * (duration - 0.05);
         }
       }
     });
 
-    // Timeline length = 1 (positions below are absolute 0..1 fractions).
-    // 1) هەولێر leaves to the RIGHT (scale down, blur, fade)
-    tl.to(l1, { xPercent: 120, scale: 0.8, filter: "blur(6px)", autoAlpha: 0, duration: 0.13 }, 0.05);
-    // 2) لە دڵی leaves to the LEFT
-    tl.to(l2, { xPercent: -140, scale: 0.85, filter: "blur(6px)", autoAlpha: 0, duration: 0.13 }, 0.19);
-    // 3) مێژوودا leaves to the RIGHT
-    tl.to(l3, { xPercent: 120, scale: 0.8, filter: "blur(6px)", autoAlpha: 0, duration: 0.13 }, 0.33);
+    // Timeline length = 1; positions are absolute fractions of the pin.
+    // --- Lines LEAVE one by one: right, left, right (small fade) ---
+    tl.to(l1, { xPercent: 115, scale: 0.94, autoAlpha: 0, duration: 0.11 }, 0.05)
+      .to(l2, { xPercent: -125, scale: 0.94, autoAlpha: 0, duration: 0.11 }, 0.17)
+      .to(l3, { xPercent: 115, scale: 0.94, autoAlpha: 0, duration: 0.11 }, 0.29);
 
-    // 5) The three lines RETURN over the final citadel frame — enter from the
-    //    right, settle moving left, soft fade-in + slight scale-up, one by one.
-    tl.set([l1, l2, l3], { filter: "blur(0px)" }, 0.66);
-    tl.fromTo(l1, { xPercent: 90, scale: 0.92, autoAlpha: 0 },
-                  { xPercent: 0, scale: 1, autoAlpha: 1, duration: 0.12 }, 0.70);
-    tl.fromTo(l2, { xPercent: 90, scale: 0.92, autoAlpha: 0 },
-                  { xPercent: 0, scale: 1, autoAlpha: 0.85, duration: 0.12 }, 0.78);
-    tl.fromTo(l3, { xPercent: 90, scale: 0.92, autoAlpha: 0 },
-                  { xPercent: 0, scale: 1, autoAlpha: 1, duration: 0.12 }, 0.86);
-    // Then the scroll hint fades and the CTA appears.
-    tl.to(scrollHint, { autoAlpha: 0, duration: 0.05 }, 0.86);
-    tl.fromTo(cta, { autoAlpha: 0, y: 20, visibility: "visible" },
-                   { autoAlpha: 1, y: 0, duration: 0.1 }, 0.9);
+    // Middle: 0.40 .. 0.80 the video keeps zooming to the citadel, no text.
 
-    // --- Fallback: if scrubbing turns out unsupported, play once on scroll ---
+    // --- Lines RETURN over the final frame: enter from the right,
+    //     settle moving left, soft small fade-in + slight scale-up ---
+    tl.fromTo(l1, { xPercent: 80, scale: 0.96, autoAlpha: 0 },
+                  { xPercent: 0, scale: 1, autoAlpha: 1, duration: 0.09 }, 0.82)
+      .fromTo(l2, { xPercent: 80, scale: 0.96, autoAlpha: 0 },
+                  { xPercent: 0, scale: 1, autoAlpha: 0.9, duration: 0.09 }, 0.87)
+      .fromTo(l3, { xPercent: 80, scale: 0.96, autoAlpha: 0 },
+                  { xPercent: 0, scale: 1, autoAlpha: 1, duration: 0.09 }, 0.92)
+      .to(hint, { autoAlpha: 0, duration: 0.05 }, 0.82)
+      .fromTo(cta, { autoAlpha: 0, y: 20, visibility: "visible" },
+                   { autoAlpha: 1, y: 0, duration: 0.08 }, 0.94);
+
+    // --- Fallback: play once through if seeking is unsupported ------
     ScrollTrigger.create({
-      trigger: hero,
-      start: "top top",
-      end: pinLength,
-      onEnter: function () {
-        if (!canScrub) { video.play().catch(function () {}); }
-      }
+      trigger: hero, start: "top top", end: pinLength,
+      onEnter: function () { if (!canScrub) video.play().catch(function () {}); }
     });
   }
 
   /* ----------------------------------------------------------
-     Split main headings into words for a reveal
-     (word-level only — never split Arabic letters)
+     Split headings into WORDS (never split Arabic letters)
      ---------------------------------------------------------- */
   function splitHeadings() {
     document.querySelectorAll(".split").forEach(function (h) {
       var words = h.textContent.trim().split(/\s+/);
       h.textContent = "";
       words.forEach(function (w, i) {
-        var word = document.createElement("span");
-        word.className = "word";
-        var inner = document.createElement("span");
-        inner.textContent = w;
-        word.appendChild(inner);
-        h.appendChild(word);
+        var word = document.createElement("span"); word.className = "word";
+        var inner = document.createElement("span"); inner.textContent = w;
+        word.appendChild(inner); h.appendChild(word);
         if (i < words.length - 1) h.appendChild(document.createTextNode(" "));
       });
     });
   }
 
   /* ----------------------------------------------------------
-     Staggered fade-up reveals + split-word reveals per section
+     Reveals + split-word heading reveals
      ---------------------------------------------------------- */
   function setupReveals() {
-    // Generic fade-ups
     gsap.utils.toArray(".reveal").forEach(function (el) {
-      ScrollTrigger.create({
-        trigger: el, start: "top 85%",
-        onEnter: function () { el.classList.add("is-in"); },
-        once: true
-      });
+      ScrollTrigger.create({ trigger: el, start: "top 86%", once: true,
+        onEnter: function () { el.classList.add("is-in"); } });
     });
-
-    // Split-word headings
     gsap.utils.toArray(".split").forEach(function (h) {
       gsap.to(h.querySelectorAll(".word > span"), {
         yPercent: 0, duration: 0.9, ease: "power3.out", stagger: 0.08,
-        scrollTrigger: { trigger: h, start: "top 85%" }
+        scrollTrigger: { trigger: h, start: "top 86%" }
       });
     });
   }
@@ -217,10 +192,8 @@
      ---------------------------------------------------------- */
   function setupParallax() {
     gsap.utils.toArray("[data-parallax] img").forEach(function (img) {
-      gsap.fromTo(img, { yPercent: -8 }, {
-        yPercent: 8, ease: "none",
-        scrollTrigger: { trigger: img.closest("[data-parallax]"), start: "top bottom", end: "bottom top", scrub: true }
-      });
+      gsap.fromTo(img, { yPercent: -8 }, { yPercent: 8, ease: "none",
+        scrollTrigger: { trigger: img.closest("[data-parallax]"), start: "top bottom", end: "bottom top", scrub: true } });
     });
   }
 
@@ -231,21 +204,15 @@
     gsap.utils.toArray(".reveal-clip").forEach(function (fig) {
       var img = fig.querySelector("img");
       gsap.set(fig, { clipPath: "inset(0 0 100% 0)" });
-      gsap.to(fig, {
-        clipPath: "inset(0 0 0% 0)", duration: 1.2, ease: "power3.inOut",
-        scrollTrigger: { trigger: fig, start: "top 80%" }
-      });
-      if (img) {
-        gsap.to(img, {
-          scale: 1, duration: 1.4, ease: "power3.out",
-          scrollTrigger: { trigger: fig, start: "top 80%" }
-        });
-      }
+      gsap.to(fig, { clipPath: "inset(0 0 0% 0)", duration: 1.2, ease: "power3.inOut",
+        scrollTrigger: { trigger: fig, start: "top 82%" } });
+      if (img) gsap.to(img, { scale: 1, duration: 1.4, ease: "power3.out",
+        scrollTrigger: { trigger: fig, start: "top 82%" } });
     });
   }
 
   /* ----------------------------------------------------------
-     Magnetic buttons (button follows cursor slightly)
+     Magnetic buttons
      ---------------------------------------------------------- */
   function setupMagnetic() {
     document.querySelectorAll(".magnetic").forEach(function (el) {
@@ -261,37 +228,33 @@
   }
 
   /* ----------------------------------------------------------
-     Custom cursor — gold ring, grows over interactive elements,
-     shows an arrow over images.
+     Custom cursor
      ---------------------------------------------------------- */
   function setupCursor() {
     var cursor = document.querySelector(".cursor");
     if (!cursor) return;
     var xTo = gsap.quickTo(cursor, "x", { duration: 0.18, ease: "power3" });
     var yTo = gsap.quickTo(cursor, "y", { duration: 0.18, ease: "power3" });
-
     window.addEventListener("mousemove", function (e) { xTo(e.clientX); yTo(e.clientY); });
     document.addEventListener("mouseleave", function () { gsap.to(cursor, { autoAlpha: 0, duration: 0.2 }); });
     document.addEventListener("mouseenter", function () { gsap.to(cursor, { autoAlpha: 1, duration: 0.2 }); });
 
-    // Grow over links/buttons; media state (with arrow) over images.
-    var media = "a, button, .btn, .link-arrow, .nav__link";
-    document.querySelectorAll(media).forEach(function (el) {
+    document.querySelectorAll("a, button, .btn, .link-arrow, .nav__link").forEach(function (el) {
       el.addEventListener("mouseenter", function () { cursor.classList.add("is-grow"); });
       el.addEventListener("mouseleave", function () { cursor.classList.remove("is-grow"); });
     });
-    document.querySelectorAll(".media, img").forEach(function (el) {
+    document.querySelectorAll(".media").forEach(function (el) {
       el.addEventListener("mouseenter", function () { cursor.classList.add("is-media"); });
       el.addEventListener("mouseleave", function () { cursor.classList.remove("is-media"); });
     });
   }
 
   /* ----------------------------------------------------------
-     Orchestrated page-load: nav then hero text, one after another
+     Orchestrated page-load: nav, then hero text, one after another
      ---------------------------------------------------------- */
   function introSequence() {
-    var tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-    tl.from(".nav__logo", { y: -20, autoAlpha: 0, duration: 0.7 })
+    gsap.timeline({ defaults: { ease: "power3.out" } })
+      .from(".nav__logo", { y: -20, autoAlpha: 0, duration: 0.7 })
       .from(".nav__links", { y: -20, autoAlpha: 0, duration: 0.7 }, "-=0.5")
       .from(".hero__line--1", { autoAlpha: 0, y: 30, duration: 0.9 }, "-=0.2")
       .from(".hero__line--2", { autoAlpha: 0, y: 20, duration: 0.8 }, "-=0.55")
@@ -300,15 +263,12 @@
   }
 
   /* ----------------------------------------------------------
-     Reduced-motion / no-GSAP fallback:
-     static poster frame, everything visible, no scrub.
+     Reduced-motion / no-GSAP fallback
      ---------------------------------------------------------- */
   function staticFallback() {
     document.querySelectorAll(".reveal").forEach(function (el) { el.classList.add("is-in"); });
     var video = document.querySelector(".hero__video");
     if (video) {
-      // Show a still first frame (poster) rather than playing.
-      video.removeAttribute("autoplay");
       var showFrame = function () { try { video.currentTime = 0.1; } catch (e) {} };
       if (video.readyState >= 1) showFrame();
       else video.addEventListener("loadedmetadata", showFrame);
