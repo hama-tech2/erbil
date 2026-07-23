@@ -81,10 +81,13 @@
     var cta = hero.querySelector(".hero__cta");
     var hint = hero.querySelector(".hero__scroll");
 
-    var VIDEO_END = 0.80;                 // video reaches its last frame at 80% of the scroll
-    var pinLength = isMobile ? "+=240%" : "+=520%";
+    // The whole clip plays across the FIRST portion of the scroll, then the
+    // last frame is held while the lines return. A shorter pin keeps the video
+    // moving briskly so the citadel arrival is actually reached, not crawled to.
+    var VIDEO_END = 0.82;                 // video reaches its last frame at 82% of the scroll
+    var pinLength = isMobile ? "+=200%" : "+=360%";
 
-    // iOS/Safari unlock so the video becomes seekable.
+    // iOS/Safari unlock so the video becomes seekable, and force buffering.
     var unlocked = false;
     function unlock() {
       if (unlocked) return; unlocked = true;
@@ -92,22 +95,29 @@
       if (p && p.then) p.then(function () { video.pause(); }).catch(function () {});
       else { try { video.pause(); } catch (e) {} }
     }
-    ["touchstart", "pointerdown", "click", "keydown"].forEach(function (ev) {
+    ["touchstart", "pointerdown", "click", "keydown", "wheel"].forEach(function (ev) {
       window.addEventListener(ev, unlock, { once: true, passive: true });
     });
+    try { video.load(); } catch (e) {}
 
-    // --- Single-smoothing video scrub -------------------------------
-    var duration = 0, target = 0, current = 0, canScrub = true;
-    function onMeta() { duration = video.duration || 0; }
+    // --- Robust video scrub -----------------------------------------
+    // Smoothed target + throttled seeking: only issue a new seek once the
+    // previous one has finished, so seeks never queue up and stutter. That
+    // queue-backup is what made the clip look like it was skipping/cutting.
+    var duration = 0, target = 0, current = 0, canScrub = true, seeking = false;
+    function onMeta() { duration = video.duration || 0; try { video.currentTime = 0; } catch (e) {} }
     if (video.readyState >= 1) onMeta();
     video.addEventListener("loadedmetadata", onMeta);
+    video.addEventListener("seeked", function () { seeking = false; });
 
     function rafLoop() {
       if (duration) {
-        // ease currentTime toward the scroll-derived target
-        current += (target - current) * 0.15;
-        if (Math.abs(target - current) < 0.004) current = target;
-        try { video.currentTime = current; } catch (e) { canScrub = false; }
+        current += (target - current) * 0.2;
+        if (Math.abs(target - current) < 0.008) current = target;
+        if (!seeking && Math.abs(video.currentTime - current) > 0.03) {
+          seeking = true;
+          try { video.currentTime = current; } catch (e) { canScrub = false; seeking = false; }
+        }
       }
       requestAnimationFrame(rafLoop);
     }
@@ -121,32 +131,33 @@
         pin: pin, scrub: isMobile ? 0.6 : 1, anticipatePin: 1,
         onUpdate: function (self) {
           if (!duration) return;
-          // Map the first VIDEO_END of scroll to the whole clip; hold after.
-          var v = self.progress / VIDEO_END; if (v > 1) v = 1;
-          target = v * (duration - 0.05);
+          var v = self.progress / VIDEO_END;
+          if (v >= 1) { target = duration - 0.04; return; }   // guarantee the final frame
+          target = v * (duration - 0.04);
         }
       }
     });
 
     // Timeline length = 1; positions are absolute fractions of the pin.
-    // --- Lines LEAVE one by one: right, left, right (small fade) ---
-    tl.to(l1, { xPercent: 115, scale: 0.94, autoAlpha: 0, duration: 0.11 }, 0.05)
-      .to(l2, { xPercent: -125, scale: 0.94, autoAlpha: 0, duration: 0.11 }, 0.17)
-      .to(l3, { xPercent: 115, scale: 0.94, autoAlpha: 0, duration: 0.11 }, 0.29);
+    // The lines stay fully readable for the first stretch, THEN leave one by
+    // one — right, left, right — each with a small fade.
+    tl.to(l1, { xPercent: 118, scale: 0.94, autoAlpha: 0, duration: 0.12 }, 0.10)
+      .to(l2, { xPercent: -128, scale: 0.94, autoAlpha: 0, duration: 0.12 }, 0.22)
+      .to(l3, { xPercent: 118, scale: 0.94, autoAlpha: 0, duration: 0.12 }, 0.34);
 
-    // Middle: 0.40 .. 0.80 the video keeps zooming to the citadel, no text.
+    // Middle: ~0.46 .. 0.82 the video keeps zooming to the citadel, no text.
 
     // --- Lines RETURN over the final frame: enter from the right,
     //     settle moving left, soft small fade-in + slight scale-up ---
     tl.fromTo(l1, { xPercent: 80, scale: 0.96, autoAlpha: 0 },
-                  { xPercent: 0, scale: 1, autoAlpha: 1, duration: 0.09 }, 0.82)
+                  { xPercent: 0, scale: 1, autoAlpha: 1, duration: 0.09 }, 0.84)
       .fromTo(l2, { xPercent: 80, scale: 0.96, autoAlpha: 0 },
-                  { xPercent: 0, scale: 1, autoAlpha: 0.9, duration: 0.09 }, 0.87)
+                  { xPercent: 0, scale: 1, autoAlpha: 0.9, duration: 0.09 }, 0.89)
       .fromTo(l3, { xPercent: 80, scale: 0.96, autoAlpha: 0 },
-                  { xPercent: 0, scale: 1, autoAlpha: 1, duration: 0.09 }, 0.92)
-      .to(hint, { autoAlpha: 0, duration: 0.05 }, 0.82)
+                  { xPercent: 0, scale: 1, autoAlpha: 1, duration: 0.09 }, 0.94)
+      .to(hint, { autoAlpha: 0, duration: 0.05 }, 0.84)
       .fromTo(cta, { autoAlpha: 0, y: 20, visibility: "visible" },
-                   { autoAlpha: 1, y: 0, duration: 0.08 }, 0.94);
+                   { autoAlpha: 1, y: 0, duration: 0.08 }, 0.95);
 
     // --- Fallback: play once through if seeking is unsupported ------
     ScrollTrigger.create({
